@@ -1,11 +1,14 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
-import {FlatList,StyleSheet,Text,TouchableOpacity,View,Image,ActivityIndicator,SafeAreaView,Dimensions} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Dimensions, FlatList, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
 const HomePage = ({ route }) => {
+  const navigation = useNavigation();
   const { username } = route.params;
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,47 +20,49 @@ const HomePage = ({ route }) => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get('https://fakestoreapi.com/products');
-      const randomProducts = getRandomProducts(response.data, 10);
-      setData(randomProducts);
+      const response = await axios.get('https://randomuser.me/api/?results=10');
+      const doctors = response.data.results.map((user) => ({
+        id: user.login.uuid,
+        name: `${user.name.first} ${user.name.last}`,
+        specialty: 'General Physician',
+        description: `Dr. ${user.name.first} specializes in family medicine.`,
+        image: user.picture.large,
+      }));
+      setData(doctors);
     } catch (error) {
-      setError('Failed to fetch products');
+      setError('Failed to fetch doctors');
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  const getRandomProducts = (products, n) => {
-    const shuffled = [...products].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, n);
-  };
-
   const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      <Image
-        source={{ uri: item.image }}
-        style={styles.image}
-        resizeMode="cover"
-      />
+    <TouchableOpacity
+      onPress={() =>
+        navigation.navigate('AddAppointment', { doctorName: item.name })
+      }
+      style={styles.card}
+    >
+      <Image source={{ uri: item.image }} style={styles.image} resizeMode="cover" />
       <View style={styles.cardContent}>
-        <View style={styles.categoryContainer}>
-          <Text style={styles.categoryTag}>{item.category}</Text>
-        </View>
-        <Text style={styles.title} numberOfLines={2}>{item.title}</Text>
-        <Text style={styles.description} numberOfLines={3}>{item.description}</Text>
-        <View style={styles.priceContainer}>
-          <Text style={styles.price}>${item.price}</Text>
-        </View>
+        <Text style={styles.title} numberOfLines={1}>
+          {item.name}
+        </Text>
+        <Text style={styles.specialty}>{item.specialty}</Text>
+        <Text style={styles.description} numberOfLines={2}>
+          {item.description}
+        </Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
+  
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#4a90e2" />
-        <Text style={styles.loadingText}>Loading products...</Text>
+        <Text style={styles.loadingText}>Loading doctors...</Text>
       </View>
     );
   }
@@ -74,30 +79,37 @@ const HomePage = ({ route }) => {
   }
 
   return (
-    <View style={styles.container}>
-      <LinearGradient
-        colors={['#f5f5f5', '#e0e0e0', '#bdbdbd']}
-        style={styles.gradient}
-      >
-        {/* SafeAreaView allows for safe area at the top (e.g., notch areas) */}
-        <SafeAreaView style={styles.safeArea}>
-          {/* Header */}
+    <SafeAreaView style={styles.container}>
+      <LinearGradient colors={['#f5f5f5', '#e0e0e0', '#bdbdbd']} style={styles.gradient}>
+        <View style={styles.safeArea}>
           <View style={styles.header}>
             <Text style={styles.welcomeText}>Welcome, {username}</Text>
           </View>
-
-          {/* Scrollable Product List */}
           <FlatList
             data={data}
             renderItem={renderItem}
-            keyExtractor={item => item.id.toString()}
+            keyExtractor={(item) => item.id}
             contentContainerStyle={styles.listContainer}
             showsVerticalScrollIndicator={false}
-            numColumns={2} // This will display two cards per row
+            numColumns={2}
           />
-        </SafeAreaView>
+        </View>
+        <View style={styles.bottomBar}>
+          <TouchableOpacity style={styles.navButton}>
+            <Ionicons name="home" size={24} color="#ffffff" />
+            <Text style={styles.navText}>Home</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navButton}>
+            <Ionicons name="call" size={24} color="#ffffff" />
+            <Text style={styles.navText}>Contact Us</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navButton}>
+            <Ionicons name="book" size={24} color="#ffffff" />
+            <Text style={styles.navText}>Bookings</Text>
+          </TouchableOpacity>
+        </View>
       </LinearGradient>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -110,18 +122,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   safeArea: {
-    flex: 1, // Ensure it uses available space
+    flex: 1,
   },
   header: {
     backgroundColor: '#ffffff',
     padding: 15,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
     elevation: 3,
   },
   welcomeText: {
@@ -131,7 +136,6 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: 15,
-    flexGrow: 1, // Ensures the FlatList takes available space
   },
   card: {
     flex: 1,
@@ -144,64 +148,50 @@ const styles = StyleSheet.create({
       height: 2,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
     elevation: 5,
-    maxWidth: (width - 40) / 2, // Adjust the card width based on screen size
+    maxWidth: (width - 40) / 2,
   },
   image: {
     width: '100%',
-    height: 200,
+    height: 150,
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
   },
   cardContent: {
     padding: 15,
   },
-  categoryContainer: {
-    marginBottom: 10,
-  },
-  categoryTag: {
-    backgroundColor: '#4a90e2',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-    color: '#fff',
-    fontSize: 12,
-    alignSelf: 'flex-start',
-  },
   title: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: 'bold',
     color: '#333',
+    marginBottom: 5,
+  },
+  specialty: {
+    fontSize: 14,
+    color: '#666',
     marginBottom: 8,
   },
   description: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 12,
-    lineHeight: 20,
+    fontSize: 12,
+    color: '#999',
   },
-  priceContainer: {
+  bottomBar: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     alignItems: 'center',
-    marginTop: 10,
-  },
-  price: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  buyButton: {
     backgroundColor: '#4a90e2',
-    paddingHorizontal: 20,
     paddingVertical: 10,
-    borderRadius: 25,
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
   },
-  buyButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+  navButton: {
+    alignItems: 'center',
+  },
+  navText: {
+    color: '#ffffff',
+    fontSize: 12,
+    marginTop: 5,
   },
   loadingContainer: {
     flex: 1,
@@ -219,7 +209,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
-    padding: 20,
   },
   errorText: {
     color: '#ff6b6b',
@@ -234,9 +223,8 @@ const styles = StyleSheet.create({
     borderRadius: 25,
   },
   retryButtonText: {
-    color: '#fff',
+    color: '#ffffff',
     fontSize: 14,
-    fontWeight: '600',
   },
 });
 

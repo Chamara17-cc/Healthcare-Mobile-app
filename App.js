@@ -1,6 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
+import AddAppointment from './components/Appointment';
 import HomePage from './components/HomePage';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
@@ -14,6 +15,7 @@ export default function App() {
         <Stack.Screen name="Register" component={RegisterForm} />
         <Stack.Screen name="Login" component={LoginForm} />
         <Stack.Screen name="Home" component={HomePage} />
+        <Stack.Screen name="AddAppointment" component={AddAppointment} />
       </Stack.Navigator>
     </NavigationContainer>
   );
