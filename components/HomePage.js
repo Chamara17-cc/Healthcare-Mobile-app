@@ -130,9 +130,11 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   welcomeText: {
-    fontSize: 20,
+    fontSize: 24,
+    fontWeight: 'bold',
     color: '#333',
-    fontWeight: '600',
+    marginBottom: 24,
+    textAlign: 'center',
   },
   listContainer: {
     padding: 15,

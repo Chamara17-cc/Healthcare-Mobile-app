@@ -1,18 +1,16 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
-  View,
   TouchableOpacity,
-  ImageBackground,
-  Dimensions,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator
+  View
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 
 const LoginForm = ({ navigation }) => {
   const [username, setUsername] = useState('');
