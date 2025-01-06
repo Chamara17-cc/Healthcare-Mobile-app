@@ -25,28 +25,25 @@ const RegisterForm = ({ navigation }) => {
   const validateForm = () => {
     let newErrors = {};
 
-    // Username validation
     if (!formData.username.trim()) {
       newErrors.username = 'Username is required';
     } else if (formData.username.length < 3) {
       newErrors.username = 'Username must be at least 3 characters';
     }
 
-    // Email validation
+
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email';
     }
 
-    // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
 
-    // Confirm password validation
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password';
     } else if (formData.password !== formData.confirmPassword) {
@@ -61,7 +58,6 @@ const RegisterForm = ({ navigation }) => {
     if (validateForm()) {
       setIsLoading(true);
       try {
-        // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1500));
         Alert.alert(
           'Registration Successful',
@@ -106,7 +102,6 @@ const RegisterForm = ({ navigation }) => {
             <Text style={styles.heading}>Create Account</Text>
             <Text style={styles.subheading}>Sign up to get started</Text>
 
-            {/* Username Input */}
             <View style={styles.inputContainer}>
               <TextInput
                 style={[styles.input, errors.username && styles.inputError]}
@@ -121,7 +116,6 @@ const RegisterForm = ({ navigation }) => {
               )}
             </View>
 
-            {/* Email Input */}
             <View style={styles.inputContainer}>
               <TextInput
                 style={[styles.input, errors.email && styles.inputError]}
@@ -137,7 +131,6 @@ const RegisterForm = ({ navigation }) => {
               )}
             </View>
 
-            {/* Password Input */}
             <View style={styles.inputContainer}>
               <TextInput
                 style={[styles.input, errors.password && styles.inputError]}
@@ -153,7 +146,6 @@ const RegisterForm = ({ navigation }) => {
               )}
             </View>
 
-            {/* Confirm Password Input */}
             <View style={styles.inputContainer}>
               <TextInput
                 style={[styles.input, errors.confirmPassword && styles.inputError]}
@@ -169,7 +161,6 @@ const RegisterForm = ({ navigation }) => {
               )}
             </View>
 
-            {/* Register Button */}
             <TouchableOpacity
               style={styles.button}
               onPress={handleRegister}
@@ -182,7 +173,7 @@ const RegisterForm = ({ navigation }) => {
               )}
             </TouchableOpacity>
 
-            {/* Login Link */}
+ 
             <View style={styles.loginContainer}>
               <Text style={styles.loginText}>Already have an account?</Text>
               <TouchableOpacity onPress={() => navigation.navigate('Login')}>
