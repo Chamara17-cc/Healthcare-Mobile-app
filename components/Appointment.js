@@ -1,15 +1,34 @@
+import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const AddAppointment = ({ route, navigation }) => {
   const { doctorName } = route.params;
   const [fever, setFever] = useState(false);
-  const [date, setDate] = useState('');
-  const [timeSlot, setTimeSlot] = useState('');
+  const [selectedDay, setSelectedDay] = useState(new Date().getDate());
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
+
+  const timeSlots = [
+    '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM',
+    '11:00 AM', '11:30 AM', '2:00 PM', '2:30 PM',
+    '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM',
+  ];
 
   const handleSubmit = () => {
-    // Handle form submission
-    console.log({ doctorName, fever, date, timeSlot });
+    if (!selectedTimeSlot) {
+      alert('Please select a time slot');
+      return;
+    }
+
+    const selectedDate = new Date(selectedYear, selectedMonth - 1, selectedDay);
+    console.log({
+      doctorName,
+      fever,
+      date: selectedDate.toLocaleDateString(),
+      timeSlot: selectedTimeSlot,
+    });
     navigation.goBack();
   };
 
@@ -19,7 +38,6 @@ const AddAppointment = ({ route, navigation }) => {
         <View style={styles.container}>
           <View style={styles.card}>
             <Text style={styles.heading}>Book Appointment</Text>
-            
             <View style={styles.doctorSection}>
               <Text style={styles.label}>Doctor</Text>
               <Text style={styles.doctorName}>{doctorName}</Text>
@@ -38,28 +56,72 @@ const AddAppointment = ({ route, navigation }) => {
             </View>
 
             <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Appointment Date</Text>
-              <TextInput
-                placeholder="Select Date"
-                style={styles.input}
-                value={date}
-                onChangeText={setDate}
-                placeholderTextColor="#999"
-              />
+              <Text style={styles.label}>Select Date</Text>
+              <View style={styles.pickerRow}>
+                <Picker
+                  selectedValue={selectedDay}
+                  style={styles.picker}
+                  onValueChange={(itemValue) => setSelectedDay(itemValue)}
+                >
+                  {Array.from({ length: 31 }, (_, i) => (
+                    <Picker.Item key={i + 1} label={`${i + 1}`} value={i + 1} />
+                  ))}
+                </Picker>
+                <Picker
+                  selectedValue={selectedMonth}
+                  style={styles.picker}
+                  onValueChange={(itemValue) => setSelectedMonth(itemValue)}
+                >
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <Picker.Item key={i + 1} label={`${i + 1}`} value={i + 1} />
+                  ))}
+                </Picker>
+                <Picker
+                  selectedValue={selectedYear}
+                  style={styles.picker}
+                  onValueChange={(itemValue) => setSelectedYear(itemValue)}
+                >
+                  {Array.from({ length: 5 }, (_, i) => {
+                    const year = new Date().getFullYear() + i;
+                    return <Picker.Item key={year} label={`${year}`} value={year} />;
+                  })}
+                </Picker>
+              </View>
             </View>
 
             <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Preferred Time</Text>
-              <TextInput
-                placeholder="Select Time Slot"
-                style={styles.input}
-                value={timeSlot}
-                onChangeText={setTimeSlot}
-                placeholderTextColor="#999"
-              />
+              <Text style={styles.label}>Available Time Slots</Text>
+              <View style={styles.timeSlotContainer}>
+                {timeSlots.map((slot) => (
+                  <TouchableOpacity
+                    key={slot}
+                    style={[
+                      styles.timeSlot,
+                      selectedTimeSlot === slot && styles.selectedTimeSlot,
+                    ]}
+                    onPress={() => setSelectedTimeSlot(slot)}
+                  >
+                    <Text
+                      style={[
+                        styles.timeSlotText,
+                        selectedTimeSlot === slot && styles.selectedTimeSlotText,
+                      ]}
+                    >
+                      {slot}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
 
-            <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
+            <TouchableOpacity
+              onPress={handleSubmit}
+              style={[
+                styles.submitButton,
+                !selectedTimeSlot && styles.disabledButton,
+              ]}
+              disabled={!selectedTimeSlot}
+            >
               <Text style={styles.submitText}>Book Appointment</Text>
             </TouchableOpacity>
           </View>
@@ -72,7 +134,7 @@ const AddAppointment = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f9f9f9',
   },
   scroll: {
     flex: 1,
@@ -80,90 +142,109 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    paddingBottom: 32,
   },
   card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 24,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 16,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   heading: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 24,
+    marginBottom: 16,
     textAlign: 'center',
+    color: '#333',
   },
   doctorSection: {
-    backgroundColor: '#f8f9fa',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 24,
-  },
-  doctorName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#2196f3',
-    marginTop: 4,
-  },
-  fieldGroup: {
-    marginBottom: 24,
+    marginBottom: 16,
   },
   label: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#666',
+    color: '#555',
     marginBottom: 8,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    backgroundColor: '#fff',
+  doctorName: {
+    fontSize: 18,
+    fontWeight: 'bold',
     color: '#333',
   },
+  fieldGroup: {
+    marginBottom: 16,
+  },
   toggleButton: {
-    padding: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    backgroundColor: '#ddd',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    borderRadius: 12,
-    backgroundColor: '#fff',
   },
   activeButton: {
-    backgroundColor: '#4caf50',
-    borderColor: '#4caf50',
+    backgroundColor: '#007bff',
   },
   toggleText: {
     fontSize: 16,
-    color: '#666',
-    fontWeight: '500',
+    color: '#333',
   },
   activeToggleText: {
     color: '#fff',
   },
-  submitButton: {
-    padding: 18,
-    backgroundColor: '#2196f3',
-    alignItems: 'center',
-    borderRadius: 12,
+  pickerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  picker: {
+    flex: 1,
+    height: 50,
+    marginHorizontal: 4,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+  },
+  timeSlotContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
     marginTop: 8,
   },
-  submitText: {
+  timeSlot: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    margin: 4,
+  },
+  selectedTimeSlot: {
+    backgroundColor: '#007bff',
+    borderColor: '#0056b3',
+  },
+  timeSlotText: {
+    fontSize: 14,
+    color: '#333',
+  },
+  selectedTimeSlotText: {
     color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
+  },
+  submitButton: {
+    backgroundColor: '#007bff',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  disabledButton: {
+    backgroundColor: '#ccc',
+  },
+  submitText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
   },
 });
+
 
 export default AddAppointment;
